@@ -1,1 +1,1 @@
-# gs-pp
+# Gold-Silver Price Prediction app
