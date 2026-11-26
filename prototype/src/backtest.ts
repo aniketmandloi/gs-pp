@@ -1,4 +1,5 @@
 import { LEVELS, type Forecast, type Level, type Model } from "./forecast.ts";
+import { autoArima } from "./models/arima.ts";
 import { bootstrapWalk } from "./models/bootstrap.ts";
 import { drift } from "./models/drift.ts";
 import { autoEtsLevel, autoEtsLog } from "./models/ets.ts";
@@ -12,7 +13,7 @@ const SCORED_HORIZONS = [1, 7, 30] as const;
 const ORIGIN_STEP = 5;
 const TEST_YEARS = 3;
 
-const MODELS: Model[] = [naive, drift, bootstrapWalk, autoEtsLevel, autoEtsLog, prophet];
+const MODELS: Model[] = [naive, drift, bootstrapWalk, autoEtsLevel, autoEtsLog, prophet, autoArima];
 
 interface Outcome {
   origin: number;
@@ -98,4 +99,8 @@ for (const metal of METALS) {
   console.log("|---|---|---|---|---|---|---|---|---|");
   MODELS.forEach((model, i) => console.log(tableRow(model, outcomes[i]!, baseline, prices)));
   console.log("");
+  MODELS.forEach((model, i) => {
+    const unscored = outcomes[i]!.filter((outcome) => !outcome.forecast).map((outcome) => dates[outcome.origin]);
+    if (unscored.length > 0) console.log(`${model.name} unscored origins: ${unscored.join(", ")}.\n`);
+  });
 }
