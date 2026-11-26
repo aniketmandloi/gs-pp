@@ -1,0 +1,65 @@
+name: Spec
+description: Describe a feature before it is sliced into work.
+labels: ["astack:spec"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: what is wrong or missing today
+    validations:
+      required: true
+  - type: textarea
+    id: users-and-outcome
+    attributes:
+      label: Users and outcome
+      description: who uses this and what they get from it
+    validations:
+      required: true
+  - type: textarea
+    id: scope-in
+    attributes:
+      label: Scope (in)
+      description: what this spec covers
+  - type: textarea
+    id: scope-out
+    attributes:
+      label: Scope (out)
+      description: what this spec leaves out
+  - type: textarea
+    id: decisions
+    attributes:
+      label: Decisions
+      description: links to the decision tickets or grill outcome this rests on
+  - type: textarea
+    id: behaviour
+    attributes:
+      label: Behaviour
+      description: user-visible behaviour, as testable statements
+    validations:
+      required: true
+  - type: textarea
+    id: technical-approach
+    attributes:
+      label: Technical approach
+      description: modules, data model, interfaces, third-party services
+  - type: textarea
+    id: environments
+    attributes:
+      label: Environments
+      description: new config and secrets per environment, migrations, rollout and rollback notes
+  - type: textarea
+    id: launch
+    attributes:
+      label: Launch
+      description: "each launch item, its decision (or out of scope: reason), and its work, split into build work and user work"
+  - type: textarea
+    id: risks
+    attributes:
+      label: Risks
+      description: what could go wrong and how it would be noticed
+  - type: textarea
+    id: open-questions
+    attributes:
+      label: Open questions
+      description: must be empty before slicing
