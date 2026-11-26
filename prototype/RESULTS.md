@@ -2,7 +2,7 @@
 
 Question: does any TypeScript model beat the naive "tomorrow = today" forecast on MAPE at 1, 7, and 30 trading days for gold (XAU) and silver (XAG) in INR per troy ounce?
 
-Short answer (measured): no model beats naive at h=1 or h=7 for either metal, and none beats it at any horizon for silver. On gold at h=30, the log-return bootstrap, drift, and AutoETS on prices cut MAPE by 5 to 6% and beat naive at 66 to 70% of origins. That is the only gain, and it is small. No model's intervals are well calibrated; all of them cover less than their nominal level, and the gap grows with the horizon.
+Short answer (measured): no model beats naive at h=1 or h=7 for either metal, and none beats it at any horizon for silver. On gold at h=30, the log-return bootstrap, drift, and AutoETS on prices cut MAPE by 5 to 6% and beat naive at 66 to 70% of origins. That is the only gain, and it is small. No model's intervals are well calibrated. With one exception, every interval covers less than its nominal level, and the shortfall mostly grows with the horizon.
 
 Labels: **measured** means a script in this folder produced the number on this machine. **Inferred** means it follows from reading code, docs, or the numbers. **Guess** means neither.
 
@@ -93,7 +93,7 @@ Prophet's coverage figures moved by up to 0.03 between two full runs, because it
 - **AutoETS, price or log price** (measured): on prices, MAPE is lower at h=30 for both metals (ratio to naive, gold: 0.95 against 0.97; silver: 1.00 against 1.02), and at h=1 and h=7 the two variants differ by at most 0.01 points. On log prices, coverage is closer to nominal. Neither beats naive on silver.
 - **Prophet** (measured): its forecasts are worse than naive by 1.5 to 8.8 times. It is also the slowest model at about 1 second per origin, and it failed at two gold origins.
 - **AutoARIMA** (measured): it is unusable on gold, where 133 of 151 origins produced garbage. On silver it is no better than naive.
-- **Intervals** (measured): no model is well calibrated, and every one covers less than its nominal level.
+- **Intervals** (measured): no model is well calibrated. Every interval covers less than its nominal level except AutoETS on log prices for silver at h=1, whose 80% interval covers 0.82.
   - Naive and drift are the worst: 95% intervals cover only 0.50 to 0.73. Their σ̂ comes from INR price changes since 2016, when prices were several times lower (gold ₹70,282 and silver ₹914 on 2016-01-01), so it understates current volatility (inferred).
   - AutoETS on log prices comes closest. For silver at h=1 it covers 0.82 and 0.93 against 0.80 and 0.95. Even so, its 30-day coverage falls to 0.64 to 0.72 for 80% intervals and 0.85 to 0.87 for 95% intervals.
   - The bootstrap behaves much like AutoETS on log prices. Its 95% intervals cover 0.82 to 0.89 and its 80% intervals cover 0.64 to 0.72.
