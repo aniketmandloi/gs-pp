@@ -6,6 +6,7 @@
     "fetch-prices": "node --env-file=../.env src/fetch.ts",
     "summary": "node src/summary.ts",
     "backtest": "node src/backtest.ts",
+    "calibration": "node src/calibration.ts",
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
