@@ -1,0 +1,29 @@
+name: Bug
+description: Report behaviour that differs from what it should be.
+labels: ["astack:bug"]
+body:
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happens
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What should happen
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: development or production, version or commit, logs
+    validations:
+      required: true
