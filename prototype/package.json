@@ -1,0 +1,14 @@
+{
+  "name": "gs-pp-backtest-prototype",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "fetch-prices": "node --env-file=../.env src/fetch.ts",
+    "summary": "node src/summary.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.4",
+    "typescript": "7.0.2"
+  }
+}
