@@ -14,6 +14,7 @@ pnpm install
 pnpm run fetch-prices   # reads GOLD_API_KEY from ../.env; skips windows already cached
 pnpm run summary        # data checks below
 pnpm run backtest       # tables below, about 7 minutes
+pnpm run calibration    # bootstrap variants in the last section, about 20 seconds
 ```
 
 The cache lives at `~/.cache/gs-pp/goldapi/{XAU,XAG}/{from}_{to}.json`, outside the repo.
@@ -98,3 +99,61 @@ Prophet's coverage figures moved by up to 0.03 between two full runs, because it
   - AutoETS on log prices comes closest. For silver at h=1 it covers 0.82 and 0.93 against 0.80 and 0.95. Even so, its 30-day coverage falls to 0.64 to 0.72 for 80% intervals and 0.85 to 0.87 for 95% intervals.
   - The bootstrap behaves much like AutoETS on log prices. Its 95% intervals cover 0.82 to 0.89 and its 80% intervals cover 0.64 to 0.72.
 - **What this means for the decision**: by the issue's rule, no TypeScript model beats the baseline, except a small and probably trend-dependent gain on gold at 30 days, so the model-language decision reopens. Python's ETS, ARIMA, and Prophet fit the same model families, and the TypeScript models that worked tie with naive on these random-walk-like series, so I do not expect Python models to beat naive by much either (guess). A Python backtest on the same cached data and origins would settle that question without spending more API quota (inferred).
+
+## Follow-up: intervals fitted on recent volatility
+
+Question: do bootstrap intervals built from recent returns reach their nominal 80% and 95% coverage? Coverage is what the app's band promises.
+
+The data, origins, and scoring are the same as above. The run reads only the cache and made no goldapi requests. The loader now reads the fixed list of 45 windows per metal and stops with ENOENT if any file is missing (measured with an empty cache directory). The full-history bootstrap is unchanged and reproduces its earlier numbers exactly (measured).
+
+Variants. Each one resamples 2,000 paths of daily log returns from a pool built only from returns before the origin:
+
+- **Last 250, 500, or 750 days**: the pool is the trailing 250, 500, or 750 daily log returns. The point forecast is the median path, so it carries the window's mean return as drift.
+- **Last 250 days, zero drift**: the pool is the same 250 returns with their mean subtracted, and the point forecast is the last price. Its MAPE therefore equals naive's, and its coverage shows the bands alone. I picked 250 days because it had the best coverage of the three windows on both metals.
+- **EWMA-scaled (λ 0.94)**: filtered historical simulation. Each return since 2016 is divided by the EWMA volatility known the day before it, with the variance seeded from the first 20 returns. The standardized returns are then rescaled by the EWMA volatility at the origin, which is held constant across the horizon.
+
+Width is the mean of (upper − lower) divided by the price at the origin, in %. At equal coverage, narrower is better.
+
+### Gold (XAU)
+
+Measured.
+
+| Model | MAPE % h=1 (ratio) | MAPE % h=7 (ratio) | MAPE % h=30 (ratio) | 80% coverage h=1/7/30 | 95% coverage h=1/7/30 | 80% width % h=1/7/30 | 95% width % h=1/7/30 |
+|---|---|---|---|---|---|---|---|
+| Naive | 0.82 (1.00) | 2.45 (1.00) | 6.02 (1.00) | 0.58 / 0.44 / 0.32 | 0.72 / 0.61 / 0.50 | 1.3 / 3.5 / 7.3 | 2.0 / 5.4 / 11.2 |
+| Log-return bootstrap | 0.81 (1.00) | 2.38 (0.97) | 5.63 (0.94) | 0.71 / 0.72 / 0.64 | 0.87 / 0.87 / 0.82 | 1.9 / 5.8 / 12.5 | 3.6 / 9.4 / 19.5 |
+| Bootstrap, last 250 days | 0.81 (0.99) | 2.39 (0.98) | 5.63 (0.94) | 0.75 / 0.81 / 0.77 | 0.92 / 0.91 / 0.93 | 2.5 / 7.3 / 16.0 | 4.6 / 11.6 / 24.5 |
+| Bootstrap, last 250 days, zero drift | 0.82 (1.00) | 2.45 (1.00) | 6.02 (1.00) | 0.77 / 0.75 / 0.66 | 0.91 / 0.89 / 0.87 | 2.5 / 7.3 / 15.3 | 4.6 / 11.5 / 23.5 |
+| Bootstrap, last 500 days | 0.81 (0.99) | 2.39 (0.98) | 5.74 (0.95) | 0.73 / 0.77 / 0.72 | 0.92 / 0.90 / 0.90 | 2.2 / 6.6 / 14.3 | 4.1 / 10.5 / 22.1 |
+| Bootstrap, last 750 days | 0.81 (1.00) | 2.40 (0.98) | 5.72 (0.95) | 0.72 / 0.75 / 0.65 | 0.90 / 0.87 / 0.89 | 2.1 / 6.3 / 13.6 | 3.9 / 10.1 / 21.0 |
+| Bootstrap, EWMA-scaled (λ 0.94) | 0.81 (1.00) | 2.39 (0.98) | 5.94 (0.99) | 0.84 / 0.80 / 0.75 | 0.94 / 0.93 / 0.93 | 2.9 / 8.5 / 18.4 | 5.4 / 13.4 / 28.4 |
+
+### Silver (XAG)
+
+Measured.
+
+| Model | MAPE % h=1 (ratio) | MAPE % h=7 (ratio) | MAPE % h=30 (ratio) | 80% coverage h=1/7/30 | 95% coverage h=1/7/30 | 80% width % h=1/7/30 | 95% width % h=1/7/30 |
+|---|---|---|---|---|---|---|---|
+| Naive | 1.52 (1.00) | 4.75 (1.00) | 10.56 (1.00) | 0.59 / 0.52 / 0.44 | 0.73 / 0.70 / 0.69 | 2.8 / 7.3 / 15.2 | 4.2 / 11.2 / 23.2 |
+| Log-return bootstrap | 1.52 (1.00) | 4.72 (0.99) | 10.57 (1.00) | 0.71 / 0.68 / 0.70 | 0.89 / 0.87 / 0.85 | 3.7 / 10.9 / 23.9 | 6.6 / 17.8 / 37.7 |
+| Bootstrap, last 250 days | 1.51 (0.99) | 4.81 (1.01) | 12.01 (1.14) | 0.79 / 0.77 / 0.76 | 0.94 / 0.89 / 0.89 | 4.9 / 14.1 / 31.4 | 8.5 / 22.4 / 48.4 |
+| Bootstrap, last 250 days, zero drift | 1.52 (1.00) | 4.75 (1.00) | 10.56 (1.00) | 0.79 / 0.76 / 0.77 | 0.94 / 0.89 / 0.89 | 4.9 / 13.9 / 29.7 | 8.4 / 22.1 / 45.8 |
+| Bootstrap, last 500 days | 1.51 (0.99) | 4.75 (1.00) | 11.20 (1.06) | 0.77 / 0.75 / 0.75 | 0.94 / 0.89 / 0.87 | 4.5 / 12.8 / 28.2 | 7.8 / 20.6 / 43.5 |
+| Bootstrap, last 750 days | 1.51 (0.99) | 4.73 (1.00) | 10.95 (1.04) | 0.77 / 0.74 / 0.74 | 0.92 / 0.88 / 0.86 | 4.3 / 12.3 / 26.7 | 7.4 / 19.7 / 41.4 |
+| Bootstrap, EWMA-scaled (λ 0.94) | 1.51 (0.99) | 4.74 (1.00) | 10.91 (1.03) | 0.85 / 0.79 / 0.81 | 0.96 / 0.93 / 0.89 | 5.6 / 16.3 / 35.4 | 10.0 / 25.7 / 55.3 |
+
+### Conclusion
+
+- **Closest to nominal at h=30 without much wider bands: the 250-day bootstrap** (measured).
+  - Gold: 0.77 and 0.93 against 0.80 and 0.95.
+  - Silver: 0.76 and 0.89. Its zero-drift twin gives 0.77 and 0.89.
+  - Its bands are 26 to 31% wider than the full-history bootstrap's at h=30.
+- **Point accuracy and drift** (measured): on silver, the 250-day drift ruins the point forecast (h=30 ratio 1.14), while the zero-drift version keeps naive's MAPE, matches the coverage, and has about 5% narrower bands. On gold, zero drift drops 30-day coverage from 0.77 to 0.66 and from 0.93 to 0.87. Gold's upward trend in the test window was pulling the drifted bands toward the outcomes (inferred).
+- **The EWMA-scaled variant** (measured):
+  - It has the best short-horizon calibration: at h=1 it covers 0.84 and 0.94 on gold and 0.85 and 0.96 on silver.
+  - At h=30 it covers 0.75 and 0.93 on gold, no better than the 250-day window. On silver it covers 0.81 and 0.89, which is better only at 80%.
+  - Its bands are 13 to 16% wider than the 250-day bands and about 47% wider than full-history bands.
+  - Holding the origin volatility fixed for 30 days is probably why it gains nothing at long horizons (guess).
+- **No variant reaches 95% on silver at h=30** (measured): the best is 0.89, even with 95% bands 46 to 55% of the price wide. That fits silver's 2026 moves of 10 to 21% in a day (inferred).
+- **Noise**: the 151 origins overlap at h=30, so they hold only about 25 independent 30-day outcomes. That gives a standard error of about 0.08 on an 80% coverage figure and about 0.04 on a 95% one (inferred). Coverage gaps of a few points between the 250-, 500-, and 750-day windows are within that noise. The gap from full history to 250 days (0.64 to 0.77 on gold at 80%) is larger than the noise (inferred).
+- **For the app** (inferred): the best measured option is a 250-day bootstrap for the band. For the point, use the last price, or the drifted median only where a backtest shows the drift helps. The app should expect 30-day bands to cover about 76 to 77% at 80% and 89 to 93% at 95%, not the nominal levels.
