@@ -1,6 +1,7 @@
 import { LEVELS, type Forecast, type Level, type Model } from "./forecast.ts";
 import { bootstrapWalk } from "./models/bootstrap.ts";
 import { drift } from "./models/drift.ts";
+import { autoEtsLevel, autoEtsLog } from "./models/ets.ts";
 import { naive } from "./models/naive.ts";
 import { isWeekday, loadCalendarDays, METALS } from "./series.ts";
 import { mean, median } from "./stats.ts";
@@ -10,7 +11,7 @@ const SCORED_HORIZONS = [1, 7, 30] as const;
 const ORIGIN_STEP = 5;
 const TEST_YEARS = 3;
 
-const MODELS: Model[] = [naive, drift, bootstrapWalk];
+const MODELS: Model[] = [naive, drift, bootstrapWalk, autoEtsLevel, autoEtsLog];
 
 interface Outcome {
   origin: number;
