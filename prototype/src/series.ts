@@ -1,4 +1,4 @@
-import { readdir, readFile } from "node:fs/promises";
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 
@@ -6,6 +6,36 @@ export const METALS = ["XAU", "XAG"] as const;
 export type Metal = (typeof METALS)[number];
 
 export const CACHE_DIR = join(homedir(), ".cache", "gs-pp", "goldapi");
+
+const FIRST_DAY = "2016-01-01";
+const LAST_DAY = "2026-11-26";
+// goldapi rejects history ranges longer than 90 days; both ends are inclusive.
+const WINDOW_DAYS = 90;
+const DAY_MS = 86_400_000;
+
+export interface HistoryWindow {
+  from: string;
+  to: string;
+}
+
+function isoDay(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
+/** The fixed request windows; the fetch fills them and every reader expects all of them. */
+export function historyWindows(): HistoryWindow[] {
+  const last = Date.parse(LAST_DAY);
+  const result: HistoryWindow[] = [];
+  for (let start = Date.parse(FIRST_DAY); start <= last; start += WINDOW_DAYS * DAY_MS) {
+    const end = Math.min(start + (WINDOW_DAYS - 1) * DAY_MS, last);
+    result.push({ from: isoDay(start), to: isoDay(end) });
+  }
+  return result;
+}
+
+export function cacheFile(metal: Metal, { from, to }: HistoryWindow): string {
+  return join(CACHE_DIR, metal, `${from}_${to}.json`);
+}
 
 export interface DailyPrice {
   date: string;
@@ -31,13 +61,14 @@ function parsePrices(file: string, json: unknown): DailyPrice[] {
   });
 }
 
-/** Every cached calendar day for a metal, sorted by date, duplicates kept. */
+/**
+ * Every calendar day for a metal from the cache, sorted by date, duplicates kept. Reads each
+ * expected window file, so a missing window fails the run instead of leaving a silent gap.
+ */
 export async function loadCalendarDays(metal: Metal): Promise<DailyPrice[]> {
-  const dir = join(CACHE_DIR, metal);
-  const files = (await readdir(dir)).filter((name) => name.endsWith(".json"));
   const days: DailyPrice[] = [];
-  for (const name of files) {
-    const file = join(dir, name);
+  for (const window of historyWindows()) {
+    const file = cacheFile(metal, window);
     days.push(...parsePrices(file, JSON.parse(await readFile(file, "utf8"))));
   }
   return days.sort((a, b) => a.date.localeCompare(b.date));
