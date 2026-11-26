@@ -11,6 +11,9 @@ importers:
       '@bsull/augurs':
         specifier: 0.10.3
         version: 0.10.3
+      '@bsull/augurs-prophet-wasmstan':
+        specifier: 0.2.0
+        version: 0.2.0
     devDependencies:
       '@types/node':
         specifier: ^24.19.4
@@ -21,8 +24,14 @@ importers:
 
 packages:
 
+  '@bsull/augurs-prophet-wasmstan@0.2.0':
+    resolution: {integrity: sha512-m+659rLEsPI7mVzIQP1md4aZMGVbMwfrP2qQ5NtGXKMrp4DRtcYaCYglttV6TAtLVj/1q4a4VoGAvmZ/I+yzZw==}
+
   '@bsull/augurs@0.10.3':
     resolution: {integrity: sha512-jlu4i6wHqkrpJ1Wp60UYXn0PdnC3AElPZ5lYqF+aSa8q8uQqviAAZGSM0BTgJCRF9P7b10NPLZf84am9MF4wog==}
+
+  '@bytecodealliance/preview2-shim@0.17.9':
+    resolution: {integrity: sha512-i0R3eQBe6PA/o/1EFE3Owe4In2rcccb6QxnjpntM/lPe3/duJ0bRQTVZM2Ufpo99X4eofGeltQUkape1C91FFA==}
 
   '@types/node@24.19.4':
     resolution: {integrity: sha512-s04odlR3ksJrLu7QLi+pddkWLD0RmSbcP9KuWn2/ozQKAp/YgwBC/6x9kJj8yAzZnGPfxePm7zm7nysVPCRagw==}
@@ -157,7 +166,13 @@ packages:
 
 snapshots:
 
+  '@bsull/augurs-prophet-wasmstan@0.2.0':
+    dependencies:
+      '@bytecodealliance/preview2-shim': 0.17.9
+
   '@bsull/augurs@0.10.3': {}
+
+  '@bytecodealliance/preview2-shim@0.17.9': {}
 
   '@types/node@24.19.4':
     dependencies:
