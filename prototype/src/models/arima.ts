@@ -2,7 +2,7 @@ import ARIMA from "arima";
 import { Z, type Band, type Level, type Model } from "../forecast.ts";
 
 // arima 0.2.8 returns garbage when the search picks an order with p = q = 0, e.g. (0,1,0)
-// with drift on gold: the first log forecast is ~1e-309 and later steps sit near 2016 log prices.
+// on gold: the first log forecast is ~1e-309 and later steps sit near 2016 log prices.
 // No real forecast moves log price by 1 (a 63% to 172% swing) within 30 weekdays.
 const MAX_LOG_MOVE = 1;
 
