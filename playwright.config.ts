@@ -1,4 +1,8 @@
+import { loadEnvConfig } from "@next/env";
 import { defineConfig, devices } from "@playwright/test";
+
+// next build inlines COMMIT_SHA from .env files, so the tests must read the same value.
+loadEnvConfig(process.cwd());
 
 const deployedUrl = process.env.PLAYWRIGHT_BASE_URL;
 const localUrl = "http://localhost:3000";
