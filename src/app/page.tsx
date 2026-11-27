@@ -38,12 +38,17 @@ async function Prices() {
   if (!latest) {
     return <p className="mt-6">No IBJA rate is stored yet.</p>;
   }
+  // en-CA writes dates as YYYY-MM-DD, the form the database dates take.
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+  }).format(new Date());
   return (
     <PricePanel
       rate={latest}
       ibja={ibja}
       spot={{ gold, silver }}
       duties={duties}
+      today={today}
     />
   );
 }
