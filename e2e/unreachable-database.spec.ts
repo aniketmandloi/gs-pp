@@ -9,9 +9,9 @@ test("the page shows an error instead of prices when the database is unreachable
   await page.goto("/");
 
   await expect(
-    page
-      .getByRole("alert")
-      .filter({ hasText: "Prices could not be loaded from the database." }),
+    page.getByRole("alert").filter({
+      hasText: "The page could not load prices from the database.",
+    }),
   ).toBeVisible();
   await expect(page.getByText("₹")).toHaveCount(0);
 });
