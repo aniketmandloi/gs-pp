@@ -73,7 +73,7 @@ test("fails when the PDF has more than one page", async () => {
   );
 
   await expect(parseThirtyDayPdf(twoPages)).rejects.toThrow(
-    "IBJA PDF has 2 pages, expected 1",
+    "IBJA PDF: 2 pages, expected 1",
   );
 });
 

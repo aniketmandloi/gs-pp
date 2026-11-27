@@ -64,7 +64,7 @@ async function placedTexts(pdf: Uint8Array): Promise<PlacedText[]> {
     verbosity: VerbosityLevel.ERRORS,
   }).promise;
   if (document.numPages !== 1) {
-    throw new Error(`IBJA PDF has ${document.numPages} pages, expected 1`);
+    throw new Error(`IBJA PDF: ${document.numPages} pages, expected 1`);
   }
   const content = await (await document.getPage(1)).getTextContent();
   const texts: PlacedText[] = [];
