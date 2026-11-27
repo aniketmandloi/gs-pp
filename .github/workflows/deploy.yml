@@ -55,7 +55,6 @@ jobs:
           vercel deploy --prebuilt --prod --json > "$RUNNER_TEMP/deployment.json"
           deployment_url="$(jq -er '.url' "$RUNNER_TEMP/deployment.json")"
           production_url="$(jq -er '.productionUrl' "$RUNNER_TEMP/deployment.json")"
-          echo "deployment-url=$deployment_url" >> "$GITHUB_OUTPUT"
           echo "production-url=$production_url" >> "$GITHUB_OUTPUT"
           {
             echo "Deployed \`$COMMIT_SHA\` to $production_url"
