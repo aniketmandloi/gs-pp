@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  GOLD_FINENESS,
   GOLD_PURITIES,
   priceWithGst,
   type GoldPurity,
@@ -13,12 +14,6 @@ const METALS = [
   { metal: "gold", label: "Gold" },
   { metal: "silver", label: "Silver" },
 ] as const;
-
-const GOLD_FINENESS: Record<GoldPurity, string> = {
-  "24K": "999",
-  "22K": "916",
-  "18K": "750",
-};
 
 const rupees = new Intl.NumberFormat("en-IN", {
   style: "currency",
