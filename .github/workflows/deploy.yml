@@ -1,0 +1,82 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+      VERCEL_TOKEN: ${{ secrets.PROD_VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.PROD_VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.PROD_VERCEL_PROJECT_ID }}
+      COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          cache: true
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Migrate
+        run: pnpm db:migrate
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@67.0.0
+
+      - name: Pull Vercel production settings
+        run: vercel pull --yes --environment=production
+
+      - name: Build
+        run: vercel build --prod
+
+      - name: Deploy
+        id: deploy
+        run: |
+          vercel deploy --prebuilt --prod --json > "$RUNNER_TEMP/deployment.json"
+          deployment_url="$(jq -er '.url' "$RUNNER_TEMP/deployment.json")"
+          production_url="$(jq -er '.productionUrl' "$RUNNER_TEMP/deployment.json")"
+          echo "deployment-url=$deployment_url" >> "$GITHUB_OUTPUT"
+          echo "production-url=$production_url" >> "$GITHUB_OUTPUT"
+          {
+            echo "Deployed \`$COMMIT_SHA\` to $production_url"
+            echo ""
+            echo "Deployment URL: $deployment_url"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Checks use the production URL: Standard Deployment Protection keeps the generated
+      # deployment URL behind Vercel login, while production domains stay public.
+      - name: Check /health reports this commit
+        env:
+          PRODUCTION_URL: ${{ steps.deploy.outputs.production-url }}
+        run: |
+          curl --fail --silent --show-error --retry 10 --retry-delay 3 --retry-all-errors \
+            "$PRODUCTION_URL/health" |
+            jq -e --arg commit "$COMMIT_SHA" '.status == "ok" and .commit == $commit'
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Smoke test
+        env:
+          PLAYWRIGHT_BASE_URL: ${{ steps.deploy.outputs.production-url }}
+        run: pnpm test:e2e
