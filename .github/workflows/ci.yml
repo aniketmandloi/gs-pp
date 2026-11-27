@@ -1,0 +1,105 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: main
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+      neon-proxy:
+        # main as of 2026-03-27
+        image: ghcr.io/timowilhelm/local-neon-http-proxy@sha256:cd2ae14edf2feafbc3330492de5c80506f77274c3bd013154cdef697bdeb768a
+        env:
+          PG_CONNECTION_STRING: postgres://postgres:postgres@postgres:5432/main
+        ports:
+          - 443:4445
+    env:
+      DATABASE_URL: postgres://postgres:postgres@db.localtest.me:5432/main
+      COMMIT_SHA: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          cache: true
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
+
+      # The Neon driver sends queries to https://api.<database host>/sql on port 443, so the
+      # proxy's TLS port is published on 443 with a certificate this job trusts. *.localtest.me
+      # resolves to 127.0.0.1. The restart also makes the proxy start after Postgres is ready.
+      - name: Serve Postgres through the Neon HTTP proxy
+        env:
+          PROXY_CONTAINER: ${{ job.services.neon-proxy.id }}
+        run: |
+          cert_dir="$RUNNER_TEMP/neon-proxy"
+          mkdir -p "$cert_dir"
+          openssl req -new -x509 -days 1 -nodes \
+            -subj "/CN=*.localtest.me" -addext "subjectAltName = DNS:*.localtest.me" \
+            -keyout "$cert_dir/server.key" -out "$cert_dir/server.pem"
+          docker cp "$cert_dir/server.pem" "$PROXY_CONTAINER:/app/server.pem"
+          docker cp "$cert_dir/server.key" "$PROXY_CONTAINER:/app/server.key"
+          docker restart "$PROXY_CONTAINER"
+          echo "NODE_EXTRA_CA_CERTS=$cert_dir/server.pem" >> "$GITHUB_ENV"
+          curl --fail --silent --show-error --retry 30 --retry-delay 1 --retry-all-errors \
+            --cacert "$cert_dir/server.pem" \
+            --header "Neon-Connection-String: $DATABASE_URL" \
+            --data '{"query":"select 1","params":[]}' \
+            https://api.localtest.me/sql
+
+      - name: Migrate
+        run: pnpm db:migrate
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm test:e2e
+
+      - name: Unused code and dependencies
+        run: pnpm knip
+
+      - name: Placeholder and conflict markers
+        env:
+          BASE_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: .github/scripts/slop-markers.sh "$BASE_SHA"
