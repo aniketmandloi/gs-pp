@@ -9,6 +9,8 @@ const localUrl = "http://localhost:3000";
 
 export default defineConfig({
   testDir: "./e2e",
+  // The other specs need the prices CI loads from e2e/fixture-prices.sql.
+  testMatch: deployedUrl ? "smoke.spec.ts" : undefined,
   forbidOnly: Boolean(process.env.CI),
   use: {
     baseURL: deployedUrl ?? localUrl,
