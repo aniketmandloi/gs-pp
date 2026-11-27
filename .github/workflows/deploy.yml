@@ -16,10 +16,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     env:
-      DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
-      VERCEL_TOKEN: ${{ secrets.PROD_VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.PROD_VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.PROD_VERCEL_PROJECT_ID }}
       COMMIT_SHA: ${{ github.sha }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -38,19 +34,34 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Migrate
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
         run: pnpm db:migrate
 
       - name: Install Vercel CLI
         run: npm install --global vercel@67.0.0
 
       - name: Pull Vercel production settings
+        env:
+          VERCEL_TOKEN: ${{ secrets.PROD_VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.PROD_VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.PROD_VERCEL_PROJECT_ID }}
         run: vercel pull --yes --environment=production
 
       - name: Build
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+          VERCEL_TOKEN: ${{ secrets.PROD_VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.PROD_VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.PROD_VERCEL_PROJECT_ID }}
         run: vercel build --prod
 
       - name: Deploy
         id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.PROD_VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.PROD_VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.PROD_VERCEL_PROJECT_ID }}
         run: |
           vercel deploy --prebuilt --prod --json > "$RUNNER_TEMP/deployment.json"
           deployment_url="$(jq -er '.url' "$RUNNER_TEMP/deployment.json")"
