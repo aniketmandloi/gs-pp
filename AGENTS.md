@@ -45,8 +45,9 @@ This repo uses the AStack workflow: plans, specs, and work items live in GitHub 
   Any workflow can read them, so only the deploy and daily workflows reference them.
 - Database changes go only through versioned migrations that are safe to run while the
   previous release still serves traffic. The deploy job runs them before it deploys.
-- Rollback: use Vercel instant rollback (dashboard or `vercel rollback`) to the previous
-  production deployment, then merge a revert PR.
+- Rollback: `vercel rollback` restores the previous production deployment (the only one Hobby
+  allows) and stops domain assignment, so the revert PR's Deploy step fails. Then run
+  `vercel promote` on the revert's deployment (see `vercel ls`) and rerun the Deploy workflow.
 
 ### Code rules
 
