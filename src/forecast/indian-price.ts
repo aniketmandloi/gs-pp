@@ -31,7 +31,6 @@ export type Selection =
 
 type Metal = Selection["metal"];
 
-// Gold is priced per 10 g, silver per kg.
 const UNIT_GRAMS = { gold: 10, silver: 1000 } as const satisfies Record<
   Metal,
   number
