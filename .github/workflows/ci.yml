@@ -90,6 +90,13 @@ jobs:
       - name: Migrate
         run: pnpm db:migrate
 
+      - name: Load end-to-end fixture prices
+        env:
+          POSTGRES_CONTAINER: ${{ job.services.postgres.id }}
+        run: >-
+          docker exec -i "$POSTGRES_CONTAINER"
+          psql -U postgres -d main -v ON_ERROR_STOP=1 < e2e/fixture-prices.sql
+
       - name: Install Playwright browser
         run: pnpm exec playwright install --with-deps chromium
 
