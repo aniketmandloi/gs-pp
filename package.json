@@ -10,9 +10,12 @@
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "knip": "knip"
+    "knip": "knip",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@neondatabase/serverless": "1.2.1",
+    "drizzle-orm": "0.45.4",
     "next": "16.4.6",
     "react": "19.3.0",
     "react-dom": "19.3.0"
@@ -28,7 +31,8 @@
     "knip": "6.48.0",
     "prettier": "3.10.1",
     "tailwindcss": "4.3.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "5.1.2"
   },
   "packageManager": "pnpm@12.3.4"
 }
