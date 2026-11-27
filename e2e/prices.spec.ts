@@ -79,7 +79,7 @@ test("the chart starts 12 months back with spot converted at the current premium
 }) => {
   await page.goto("/");
 
-  await expectChartDay(page, "first", ["20 Nov 2025", "₹94,939"]);
+  await expectChartDay(page, "first", ["26 Nov 2025", "₹94,939"]);
 });
 
 test("the chart ends on the latest IBJA PM rate plus GST", async ({ page }) => {
@@ -92,11 +92,11 @@ test("the chart follows the selected purity and metal", async ({ page }) => {
   await page.goto("/");
 
   await page.getByRole("button", { name: "22K" }).click();
-  await expectChartDay(page, "first", ["20 Nov 2025", "₹86,964"]);
+  await expectChartDay(page, "first", ["26 Nov 2025", "₹86,964"]);
   await expectChartDay(page, "last", ["26 Nov 2026", "₹94,348"]);
 
   await page.getByRole("tab", { name: "Silver" }).click();
-  await expectChartDay(page, "first", ["20 Nov 2025", "₹1,42,409"]);
+  await expectChartDay(page, "first", ["26 Nov 2025", "₹1,42,409"]);
   await expectChartDay(page, "last", ["26 Nov 2026", "₹1,54,500"]);
 });
 

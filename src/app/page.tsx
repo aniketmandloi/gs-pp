@@ -5,15 +5,14 @@ import { ibjaRate, importDuty, spotPrice } from "@/db/schema";
 import PricePanel from "./price-panel";
 import PricesUnavailable from "./prices-unavailable";
 
-// The chart covers the 12 months up to each table's latest date.
-const spotSince = sql`(select max(${spotPrice.date}) from ${spotPrice}) - interval '12 months'`;
-const ibjaSince = sql`(select max(${ibjaRate.date}) from ${ibjaRate}) - interval '12 months'`;
+// The chart covers the 12 months up to the latest spot or IBJA date.
+const chartStart = sql`greatest((select max(${spotPrice.date}) from ${spotPrice}), (select max(${ibjaRate.date}) from ${ibjaRate})) - interval '12 months'`;
 
 function spotPrices(metal: typeof spotPrice.$inferSelect.metal) {
   return db
     .select({ date: spotPrice.date, inrPerTroyOz: spotPrice.inrPerTroyOz })
     .from(spotPrice)
-    .where(and(eq(spotPrice.metal, metal), gte(spotPrice.date, spotSince)))
+    .where(and(eq(spotPrice.metal, metal), gte(spotPrice.date, chartStart)))
     .orderBy(spotPrice.date);
 }
 
@@ -30,7 +29,7 @@ async function Prices() {
         silver999: ibjaRate.silver999,
       })
       .from(ibjaRate)
-      .where(gte(ibjaRate.date, ibjaSince))
+      .where(gte(ibjaRate.date, chartStart))
       .orderBy(ibjaRate.date),
     db.select().from(importDuty),
   ]);
