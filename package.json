@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "knip": "knip",
     "test": "vitest run",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@neondatabase/serverless": "1.2.1",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@eslint-community/eslint-plugin-eslint-comments": "4.8.1",
     "@next/env": "16.4.6",
+    "@playwright/test": "1.65.1",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
