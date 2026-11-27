@@ -5,7 +5,24 @@ This repo uses the AStack workflow: plans, specs, and work items live in GitHub 
 
 ### Commands
 
-None yet: the walking-skeleton slice adds them.
+- Install: `pnpm install --frozen-lockfile`
+- Dev server: `pnpm dev` (the user starts it; agents never do)
+- Unit tests: `pnpm test` (Vitest)
+- End-to-end tests: `pnpm test:e2e` (Playwright against `pnpm start`; run `pnpm build` first)
+- Lint and format: `pnpm lint`, `pnpm format:check`, `pnpm format` to rewrite
+- Typecheck: `pnpm typecheck`
+- Unused files, exports, and dependencies: `pnpm knip`
+- Placeholder and conflict markers in added lines: `.github/scripts/slop-markers.sh main`
+- Build: `pnpm build` (needs `DATABASE_URL`; `COMMIT_SHA` is the commit `/health` reports)
+- Migrations: `pnpm db:migrate` applies `src/db/migrations/` to `DATABASE_URL`
+
+### Conventions
+
+- Pages and route handlers live in `src/app/` (App Router), e.g. `src/app/health/route.ts`.
+- Import the database as `db` from `@/db` (`src/db/index.ts`, Drizzle on the Neon HTTP driver).
+- Unit tests sit next to the code as `*.test.ts`; end-to-end tests live in `e2e/`.
+- Imports into `src/` use the `@/` alias.
+- Config files outside Next.js load `.env` with `@next/env`, as `drizzle.config.ts` does.
 
 ### Workflow
 
@@ -19,15 +36,17 @@ None yet: the walking-skeleton slice adds them.
 
 ### Environments
 
-- Every merge to `main` deploys to `development`; only a GitHub release deploys to `production`.
+- There is one environment: the Vercel production deployment. `.github/workflows/deploy.yml`
+  deploys it on every merge to `main`. There are no preview deployments.
 - All config comes from environment variables. Nothing in code differs between environments.
 - Every new variable goes in `.env.example` with a safe dummy value. Never commit a secret or
   a real `.env` file.
-- Deploy secrets are repository secrets named `DEV_<NAME>` and `PROD_<NAME>`; each deploy job
-  maps its own prefix to `<NAME>`. Any workflow can read a `PROD_` secret, so never reference
-  `PROD_` secrets outside the production deploy job.
+- Deploy secrets are repository secrets named `PROD_<NAME>`; each job maps them to `<NAME>`.
+  Any workflow can read them, so only the deploy and daily workflows reference them.
 - Database changes go only through versioned migrations that are safe to run while the
-  previous release still serves traffic.
+  previous release still serves traffic. The deploy job runs them before it deploys.
+- Rollback: use Vercel instant rollback (dashboard or `vercel rollback`) to the previous
+  production deployment, then merge a revert PR.
 
 ### Code rules
 
