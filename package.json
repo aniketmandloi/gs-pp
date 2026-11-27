@@ -9,7 +9,8 @@
     "lint": "eslint --max-warnings=0",
     "typecheck": "next typegen && tsc --noEmit",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "knip": "knip"
   },
   "dependencies": {
     "next": "16.4.6",
@@ -24,6 +25,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "knip": "6.48.0",
     "prettier": "3.10.1",
     "tailwindcss": "4.3.3",
     "typescript": "^5"
