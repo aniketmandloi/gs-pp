@@ -8,7 +8,8 @@ This repo uses the AStack workflow: plans, specs, and work items live in GitHub 
 - Install: `pnpm install --frozen-lockfile`
 - Dev server: `pnpm dev` (the user starts it; agents never do)
 - Unit tests: `pnpm test` (Vitest)
-- End-to-end tests: `pnpm test:e2e` (Playwright against `pnpm start`; run `pnpm build` first)
+- End-to-end tests: `pnpm test:e2e` (Playwright against `pnpm start`; run `pnpm build` first). `e2e/prices.spec.ts`
+  expects `e2e/fixture-prices.sql` loaded into a throwaway database, as CI does
 - Lint and format: `pnpm lint`, `pnpm format:check`, `pnpm format` to rewrite
 - Typecheck: `pnpm typecheck`
 - Unused files, exports, and dependencies: `pnpm knip`
