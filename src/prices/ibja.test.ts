@@ -58,6 +58,25 @@ test("keeps only the dates that have a PM fixing", async () => {
   ]);
 });
 
+test("fails when the PDF has more than one page", async () => {
+  // pdf.js rebuilds the missing cross-reference table, so these objects are a valid PDF.
+  const twoPages = new TextEncoder().encode(
+    [
+      "%PDF-1.4",
+      "1 0 obj << /Type /Catalog /Pages 2 0 R >> endobj",
+      "2 0 obj << /Type /Pages /Kids [3 0 R 4 0 R] /Count 2 >> endobj",
+      "3 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >> endobj",
+      "4 0 obj << /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] >> endobj",
+      "trailer << /Root 1 0 R >>",
+      "%%EOF",
+    ].join("\n"),
+  );
+
+  await expect(parseThirtyDayPdf(twoPages)).rejects.toThrow(
+    "IBJA PDF has 2 pages, expected 1",
+  );
+});
+
 test("finds the 30-day PDF link on the IBJA homepage", () => {
   const homepage = `<a target="_blank" href="../UploadedFiles/30DaysPdf/Pdf_3411_20261127074853615_Daily Opening and Closing Market Rate.pdf" class="textsmall">`;
 
