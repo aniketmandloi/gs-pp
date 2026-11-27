@@ -15,12 +15,15 @@ async function expectChartDay(
   // The chart is redrawn at its full width once it hydrates, so the line is measured again
   // until the tooltip answers.
   await expect(async () => {
-    const line = await chart.locator(".recharts-line-curve").boundingBox();
-    if (!line) {
-      throw new Error("The chart has no line");
-    }
-    // Days sit more than 1 px apart, so half a pixel in stays on the end day.
-    const x = day === "first" ? line.x + 0.5 : line.x + line.width - 0.5;
+    // boundingBox() widens an SVG path by its stroke, past the area where Recharts shows the
+    // tooltip. Chrome floors pointer x, so the last day needs the exact right edge.
+    const line = await chart
+      .locator(".recharts-line-curve")
+      .evaluate((path) => {
+        const { x, y, width, height } = path.getBoundingClientRect();
+        return { x, y, width, height };
+      });
+    const x = day === "first" ? line.x + 0.5 : line.x + line.width;
     await page.mouse.move(x, line.y + line.height / 2);
     for (const text of texts) {
       await expect(chart).toContainText(text, { timeout: 1000 });
