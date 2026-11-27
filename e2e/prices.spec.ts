@@ -97,6 +97,18 @@ test("the chart follows the selected purity and metal", async ({ page }) => {
   await expectChartDay(page, "last", ["26 Nov 2026", "₹1,54,500"]);
 });
 
+test("the data date is a warning when spot prices are more than 2 trading days old", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  await expect(
+    page.getByRole("alert").filter({ hasText: "Data as of" }),
+  ).toHaveText(
+    "Data as of 20 Nov 2026. Spot prices are more than 2 trading days old.",
+  );
+});
+
 test.describe("at 375 px wide", () => {
   test.use({ viewport: { width: 375, height: 812 } });
 
