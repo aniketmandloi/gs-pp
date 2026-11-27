@@ -1,0 +1,143 @@
+{
+  "id": "c437a382-7ffb-42dc-925f-19b8204fd8b9",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.ibja_rate": {
+      "name": "ibja_rate",
+      "schema": "",
+      "columns": {
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "gold_999": {
+          "name": "gold_999",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gold_916": {
+          "name": "gold_916",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "gold_750": {
+          "name": "gold_750",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "silver_999": {
+          "name": "silver_999",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fetched_at": {
+          "name": "fetched_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.import_duty": {
+      "name": "import_duty",
+      "schema": "",
+      "columns": {
+        "effective_from": {
+          "name": "effective_from",
+          "type": "date",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rate": {
+          "name": "rate",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.spot_price": {
+      "name": "spot_price",
+      "schema": "",
+      "columns": {
+        "metal": {
+          "name": "metal",
+          "type": "metal",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "inr_per_troy_oz": {
+          "name": "inr_per_troy_oz",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "spot_price_metal_date_pk": {
+          "name": "spot_price_metal_date_pk",
+          "columns": [
+            "metal",
+            "date"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.metal": {
+      "name": "metal",
+      "schema": "public",
+      "values": [
+        "XAU",
+        "XAG"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}
