@@ -25,9 +25,9 @@ This repo uses the AStack workflow: plans, specs, and work items live in GitHub 
 - Unit tests sit next to the code as `*.test.ts`; end-to-end tests live in `e2e/`.
 - Imports into `src/` use the `@/` alias.
 - Config files outside Next.js load `.env` with `@next/env`, as `drizzle.config.ts` does.
-- shadcn/ui components are copied from its registry into `src/components/ui/` without their
-  unused exports, which knip rejects. `src/app/globals.css` defines the theme colours their
-  classes name.
+- Copy shadcn/ui components from its registry into `src/components/ui/` and delete the exports
+  nothing imports, since knip fails on unused exports. `src/app/globals.css` defines the theme
+  colours their classes name.
 
 ### Workflow
 
