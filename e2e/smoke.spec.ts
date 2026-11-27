@@ -12,7 +12,7 @@ test("/health reports ok and the built commit", async ({ request }) => {
   const response = await request.get("/health");
 
   expect(response.status()).toBe(200);
-  expect(await response.json()).toEqual({
+  expect(await response.json()).toStrictEqual({
     status: "ok",
     commit: process.env.COMMIT_SHA,
   });
