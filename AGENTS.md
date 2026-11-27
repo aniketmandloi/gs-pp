@@ -41,8 +41,8 @@ This repo uses the AStack workflow: plans, specs, and work items live in GitHub 
 - All config comes from environment variables. Nothing in code differs between environments.
 - Every new variable goes in `.env.example` with a safe dummy value. Never commit a secret or
   a real `.env` file.
-- Deploy secrets are repository secrets named `PROD_<NAME>`; each job maps them to `<NAME>`.
-  Any workflow can read them, so only the deploy and daily workflows reference them.
+- Deploy secrets are repository secrets named `PROD_<NAME>`; each step that needs one maps it to
+  `<NAME>`. Any workflow can read them, so only the deploy and daily workflows reference them.
 - Database changes go only through versioned migrations that are safe to run while the
   previous release still serves traffic. The deploy job runs them before it deploys.
 - Rollback: 1. `vercel rollback` restores the previous production deployment (the only one
