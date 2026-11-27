@@ -6,10 +6,12 @@ loadEnvConfig(process.cwd());
 
 const deployedUrl = process.env.PLAYWRIGHT_BASE_URL;
 const localUrl = "http://localhost:3000";
+// unreachable-database.spec.ts uses this server, whose database host does not resolve.
+const unreachableDatabaseUrl = "http://localhost:3001";
 
 export default defineConfig({
   testDir: "./e2e",
-  // The other specs need the prices CI loads from e2e/fixture-prices.sql.
+  // The other specs need the prices CI loads from e2e/fixture-prices.sql and the local servers.
   testMatch: deployedUrl ? "smoke.spec.ts" : undefined,
   forbidOnly: Boolean(process.env.CI),
   use: {
@@ -18,9 +20,17 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: deployedUrl
     ? undefined
-    : {
-        command: "pnpm start",
-        url: localUrl,
-        reuseExistingServer: !process.env.CI,
-      },
+    : [
+        {
+          command: "pnpm start",
+          url: localUrl,
+          reuseExistingServer: !process.env.CI,
+        },
+        {
+          command: "pnpm start --port 3001",
+          url: unreachableDatabaseUrl,
+          reuseExistingServer: !process.env.CI,
+          env: { DATABASE_URL: "postgresql://user:password@db.invalid/neondb" },
+        },
+      ],
 });
