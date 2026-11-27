@@ -4,31 +4,33 @@ import { useState } from "react";
 import {
   GOLD_FINENESS,
   GOLD_PURITIES,
+  priceHistory,
   priceWithGst,
   type GoldPurity,
+  type ImportDuty,
   type Selection,
+  type SpotPrice,
 } from "@/forecast/indian-price";
 import type { IbjaPmRate } from "@/prices/ibja";
+import { calendarDay, rupees } from "./formats";
+import PriceChart from "./price-chart";
 
 const METALS = [
   { metal: "gold", label: "Gold" },
   { metal: "silver", label: "Silver" },
 ] as const;
 
-const rupees = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
-
-const ibjaDay = new Intl.DateTimeFormat("en-IN", {
-  day: "numeric",
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-});
-
-export default function PriceHeader({ rate }: { rate: IbjaPmRate }) {
+export default function PricePanel({
+  rate,
+  ibja,
+  spot,
+  duties,
+}: {
+  rate: IbjaPmRate;
+  ibja: IbjaPmRate[];
+  spot: Record<Selection["metal"], SpotPrice[]>;
+  duties: ImportDuty[];
+}) {
   const [metal, setMetal] = useState<Selection["metal"]>("gold");
   const [purity, setPurity] = useState<GoldPurity>("24K");
   const selection: Selection = metal === "gold" ? { metal, purity } : { metal };
@@ -82,8 +84,11 @@ export default function PriceHeader({ rate }: { rate: IbjaPmRate }) {
         </p>
         <p className="mt-1 text-sm text-neutral-600">
           Including 3% GST. IBJA PM rate of{" "}
-          {ibjaDay.format(new Date(rate.date))}.
+          {calendarDay.format(new Date(rate.date))}.
         </p>
+        <PriceChart
+          history={priceHistory(spot[metal], ibja, duties, selection)}
+        />
       </div>
     </section>
   );
