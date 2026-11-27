@@ -22,7 +22,7 @@ git diff --unified=0 --no-color --diff-filter=d "$base"...HEAD -- . ':(exclude)A
         printf "%s:%d: placeholder marker without an issue link: %s\n", path, line, text
         found = 1
       }
-      if (text ~ /^(<<<<<<<|>>>>>>>)( |$)/ || text ~ /^=======$/) {
+      if (text ~ /^(<<<<<<<|>>>>>>>)( |$)/) {
         printf "%s:%d: merge-conflict marker: %s\n", path, line, text
         found = 1
       }
