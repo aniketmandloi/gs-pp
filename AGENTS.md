@@ -15,6 +15,7 @@ This repo uses the AStack workflow: plans, specs, and work items live in GitHub 
 - Placeholder and conflict markers in added lines: `.github/scripts/slop-markers.sh main`
 - Build: `pnpm build` (needs `DATABASE_URL`; `COMMIT_SHA` is the commit `/health` reports)
 - Migrations: `pnpm db:migrate` applies `src/db/migrations/` to `DATABASE_URL`
+- Seed: `pnpm seed` loads `~/.cache/gs-pp/goldapi/` and IBJA's 30-day PDF into `DATABASE_URL`, skipping rows already stored
 
 ### Conventions
 

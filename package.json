@@ -13,6 +13,7 @@
     "knip": "knip",
     "test": "vitest run",
     "db:migrate": "drizzle-kit migrate",
+    "seed": "tsx scripts/seed.ts",
     "test:e2e": "playwright test"
   },
   "dependencies": {
@@ -37,6 +38,7 @@
     "knip": "6.48.0",
     "prettier": "3.10.1",
     "tailwindcss": "4.3.3",
+    "tsx": "4.23.15",
     "typescript": "^5",
     "vitest": "5.1.2"
   },
