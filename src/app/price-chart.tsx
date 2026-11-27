@@ -11,7 +11,7 @@ import type { PricePoint } from "@/forecast/indian-price";
 import { calendarDay, rupees } from "./formats";
 
 const chartConfig = {
-  price: { label: "Price", color: "var(--color-amber-600)" },
+  price: { color: "var(--color-amber-600)" },
 } satisfies ChartConfig;
 
 const month = new Intl.DateTimeFormat("en-IN", {
