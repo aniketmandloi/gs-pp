@@ -1,7 +1,7 @@
 import { getDocument, VerbosityLevel } from "pdfjs-dist/legacy/build/pdf.mjs";
 import type { ibjaRate } from "@/db/schema";
 
-type IbjaPmRate = Omit<typeof ibjaRate.$inferInsert, "fetchedAt">;
+export type IbjaPmRate = Omit<typeof ibjaRate.$inferInsert, "fetchedAt">;
 type Product = Exclude<keyof IbjaPmRate, "date">;
 
 const IBJA_URL = "https://ibjarates.com/";
