@@ -8,8 +8,11 @@ base="${1:?usage: slop-markers.sh <base-ref>}"
 # AGENTS.md is skipped because its code rules name the markers.
 git diff --unified=0 --no-color --diff-filter=d "$base"...HEAD -- . ':(exclude)AGENTS.md' |
   awk '
-    /^\+\+\+ / { path = substr($0, 7); next }
+    # An added line that starts with "++" also reads "+++ ", so only the file header names a path.
+    /^diff --git / { in_header = 1; next }
+    in_header && /^\+\+\+ / { path = substr($0, 7); next }
     /^@@ / {
+      in_header = 0
       split($3, added, ",")
       line = substr(added[1], 2)
       next
